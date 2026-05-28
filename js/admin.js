@@ -763,6 +763,8 @@ function editTask(id) {
 function deleteTask(id) {
   if (!confirm('ลบงานนี้ออก?')) return;
   saveTasks(getTasks().filter(t => String(t.id) !== String(id)));
+  // ลบออกจาก Supabase ด้วย
+  if (typeof fb_deleteTask === 'function') fb_deleteTask(id);
   renderTasksAdmin();
   showToast('ลบงานสำเร็จ', 'error');
 }

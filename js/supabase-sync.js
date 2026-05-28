@@ -106,6 +106,26 @@ async function fb_fetchAttendance(grade, room, date) {
   } catch(e) { return null; }
 }
 
+// ---- DELETE TASK ----
+async function fb_deleteTask(id) {
+  if (!_sbReady) return;
+  try {
+    const { error } = await _sb.from('tasks').delete().eq('id', String(id));
+    if (error) throw error;
+    console.log('[Supabase] ✅ ลบ task สำเร็จ:', id);
+  } catch(e) { console.warn('[Supabase] deleteTask:', e.message); }
+}
+
+// ---- DELETE SUBMISSION ----
+async function fb_deleteSubmission(id) {
+  if (!_sbReady) return;
+  try {
+    const { error } = await _sb.from('submissions').delete().eq('id', String(id));
+    if (error) throw error;
+    console.log('[Supabase] ✅ ลบ submission สำเร็จ:', id);
+  } catch(e) { console.warn('[Supabase] deleteSubmission:', e.message); }
+}
+
 // ---- SUBMISSIONS ----
 async function fb_saveSubmission(sub) {
   if (!_sbReady) return;
