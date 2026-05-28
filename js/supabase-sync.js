@@ -117,7 +117,9 @@ async function fb_saveSubmission(sub) {
       student_no:   sub.studentNo   || '',
       grade:        sub.grade       || '',
       room:         sub.room        || 0,
-      submitted_at: sub.submittedAt || 0,
+      submitted_at: typeof sub.submittedAt === 'string'
+                      ? new Date(sub.submittedAt).getTime()
+                      : (sub.submittedAt || 0),
       type:         sub.type        || '',
       images:       sub.images      || []   // เก็บ base64 ใน JSONB
     }, { onConflict: 'id' });
