@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>ระบบสั่งงานนักเรียน | Teacher Portal</title>
+  <meta name="description" content="ระบบสั่งงานและติดตามการเรียนของนักเรียนชั้น ป.5 ป.6 และ ม.4" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body>
+  <div class="bg-effects">
+    <div class="bg-orb bg-orb-1"></div>
+    <div class="bg-orb bg-orb-2"></div>
+    <div class="bg-orb bg-orb-3"></div>
+  </div>
+
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand">
+      <div class="navbar-logo">📚</div>
+      <div>
+        <div class="navbar-title">Teacher Portal</div>
+        <div class="navbar-subtitle">ระบบจัดการงานนักเรียน</div>
+      </div>
+    </a>
+    <div class="navbar-nav">
+      <a href="#classes" class="nav-link">ชั้นเรียน</a>
+      <a href="#announcements" class="nav-link">ประกาศ</a>
+      <a href="admin/login.html" class="nav-link btn-admin">🔐 ผู้ดูแลระบบ</a>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-badge">
+      <span class="hero-badge-dot"></span>
+      ระบบสั่งงานออนไลน์ • โรงเรียน
+    </div>
+    <h1 class="hero-title">ระบบสั่งงาน<br /><span class="gradient-text">นักเรียนออนไลน์</span></h1>
+    <p class="hero-subtitle">แพลตฟอร์มจัดการงานและติดตามความก้าวหน้าของนักเรียน แยกตามระดับชั้นอย่างชัดเจน</p>
+    <div class="hero-stats">
+      <div class="stat-item">
+        <div class="stat-num">3</div>
+        <div class="stat-label">ระดับชั้น</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num" id="total-students">0</div>
+        <div class="stat-label">นักเรียน</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num" id="total-tasks">0</div>
+        <div class="stat-label">งานที่สั่ง</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="classes">
+    <div class="section-header">
+      <div class="section-label">เลือกระดับชั้น</div>
+      <h2 class="section-title">ห้องเรียนของเรา</h2>
+      <p class="section-desc">คลิกเพื่อเข้าสู่หน้าสั่งงานของแต่ละระดับชั้น</p>
+    </div>
+    <div class="classes-grid">
+
+      <a href="classroom-p5.html" class="class-card card-p5">
+        <div class="card-glow-bg"></div>
+        <div class="class-badge">🎒</div>
+        <div class="class-level">Primary 5</div>
+        <div class="class-name">ประถมศึกษาปีที่ 5</div>
+        <p class="class-desc">งานและกิจกรรมสำหรับนักเรียนชั้นประถมศึกษาปีที่ 5 ทุกวิชา</p>
+        <div class="class-meta">
+          <span class="meta-tag">📖 วิชาทั้งหมด</span>
+          <span class="meta-tag" id="p5-count">👤 0 คน</span>
+        </div>
+        <div class="card-btn">
+          <span>เข้าสู่ห้อง ป.5</span>
+          <span class="card-btn-arrow">→</span>
+        </div>
+      </a>
+
+      <a href="classroom-p6.html" class="class-card card-p6">
+        <div class="card-glow-bg"></div>
+        <div class="class-badge">📝</div>
+        <div class="class-level">Primary 6</div>
+        <div class="class-name">ประถมศึกษาปีที่ 6</div>
+        <p class="class-desc">งานและกิจกรรมสำหรับนักเรียนชั้นประถมศึกษาปีที่ 6 ทุกวิชา</p>
+        <div class="class-meta">
+          <span class="meta-tag">📖 วิชาทั้งหมด</span>
+          <span class="meta-tag" id="p6-count">👤 0 คน</span>
+        </div>
+        <div class="card-btn">
+          <span>เข้าสู่ห้อง ป.6</span>
+          <span class="card-btn-arrow">→</span>
+        </div>
+      </a>
+
+      <a href="classroom-m4.html" class="class-card card-m4">
+        <div class="card-glow-bg"></div>
+        <div class="class-badge">🎓</div>
+        <div class="class-level">Matthayom 4</div>
+        <div class="class-name">มัธยมศึกษาปีที่ 4</div>
+        <p class="class-desc">งานและกิจกรรมสำหรับนักเรียนชั้นมัธยมศึกษาปีที่ 4 ทุกวิชา</p>
+        <div class="class-meta">
+          <span class="meta-tag">📖 วิชาทั้งหมด</span>
+          <span class="meta-tag" id="m4-count">👤 0 คน</span>
+        </div>
+        <div class="card-btn">
+          <span>เข้าสู่ห้อง ม.4</span>
+          <span class="card-btn-arrow">→</span>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+  <section class="announcements" id="announcements">
+    <div class="section-header">
+      <div class="section-label">ข่าวสาร</div>
+      <h2 class="section-title">ประกาศจากครู</h2>
+    </div>
+    <div class="announcement-list">
+      <div class="announcement-item">
+        <div class="announcement-icon">📢</div>
+        <div class="announcement-content">
+          <div class="announcement-title">ยินดีต้อนรับสู่ระบบสั่งงานออนไลน์</div>
+          <div class="announcement-desc">ระบบนี้ใช้สำหรับสั่งงานและติดตามการส่งงานของนักเรียน
+            กรุณาเลือกระดับชั้นของท่านด้านบน</div>
+        </div>
+        <div class="announcement-date">วันนี้</div>
+      </div>
+      <div class="announcement-item">
+        <div class="announcement-icon">📅</div>
+        <div class="announcement-content">
+          <div class="announcement-title">ตรวจสอบงานที่ครูสั่งทุกวัน</div>
+          <div class="announcement-desc">นักเรียนควรเข้ามาตรวจสอบงานและกำหนดส่งงานอย่างสม่ำเสมอ</div>
+        </div>
+        <div class="announcement-date">19 พ.ค. 68</div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <p>© 2568 Teacher Portal — ระบบสั่งงานนักเรียน | พัฒนาโดยครูสรวิชญ์</p>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+
+</html>

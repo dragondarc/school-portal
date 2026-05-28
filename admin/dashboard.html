@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Dashboard | ผู้ดูแลระบบ</title>
+<link rel="stylesheet" href="../css/style.css"/>
+<link rel="stylesheet" href="../css/admin.css"/>
+<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+<style>
+.room-tab-wrap{display:flex;gap:0.4rem;flex-wrap:wrap;margin-bottom:1rem;}
+.room-tab{padding:5px 14px;border-radius:7px;font-family:inherit;font-size:0.82rem;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--bg-glass);color:var(--text-secondary);transition:var(--transition);}
+.room-tab.active{background:var(--primary);color:#fff;border-color:var(--primary);}
+.grade-rooms-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:0.8rem;margin-bottom:1.5rem;}
+.room-mini-card{background:var(--bg-card2);border:1px solid var(--border);border-radius:12px;padding:1rem;text-align:center;transition:var(--transition);}
+.room-mini-card:hover{border-color:rgba(255,255,255,0.2);}
+.room-mini-name{font-size:0.95rem;font-weight:700;margin-bottom:0.3rem;}
+.room-mini-count{font-size:0.78rem;color:var(--text-secondary);}
+.room-mini-bar{height:4px;border-radius:2px;margin-top:0.6rem;background:var(--bg-dark);}
+.room-mini-fill{height:100%;border-radius:2px;transition:width 0.6s ease;}
+.grade-label{font-size:1rem;font-weight:700;margin-bottom:0.8rem;display:flex;align-items:center;gap:8px;}
+</style>
+</head>
+<body>
+<div class="bg-effects">
+  <div class="bg-orb bg-orb-1"></div>
+  <div class="bg-orb bg-orb-2"></div>
+</div>
+<div class="admin-layout">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">🏫</div>
+      <div class="sidebar-title">Teacher Portal</div>
+      <div class="sidebar-sub">ระบบผู้ดูแล</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">เมนูหลัก</div>
+      <a href="#" class="sidebar-link active" onclick="showPage('dashboard',this);return false;"><span class="nav-icon">📊</span> Dashboard</a>
+      <a href="#" class="sidebar-link" onclick="showPage('attendance',this);return false;"><span class="nav-icon">✅</span> เช็คชื่อนักเรียน</a>
+      <a href="#" class="sidebar-link" onclick="showPage('students',this);return false;"><span class="nav-icon">👥</span> รายชื่อนักเรียน</a>
+      <a href="#" class="sidebar-link" onclick="showPage('assignments',this);return false;"><span class="nav-icon">📋</span> จัดการงาน</a>
+      <div class="nav-section-label">ระบบ</div>
+      <a href="../index.html" class="sidebar-link"><span class="nav-icon">🏠</span> หน้าหลัก</a>
+      <a href="#" class="sidebar-link" onclick="logout();return false;"><span class="nav-icon">🚪</span> ออกจากระบบ</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div style="font-size:0.78rem;color:var(--text-muted)">เข้าสู่ระบบในฐานะ</div>
+      <div style="font-size:0.88rem;font-weight:600">Sorawit255</div>
+    </div>
+  </aside>
+
+  <main class="admin-main">
+
+    <!-- DASHBOARD -->
+    <div id="page-dashboard" class="page-content">
+      <div class="admin-topbar">
+        <div><h2>📊 Dashboard</h2><div style="font-size:0.82rem;color:var(--text-secondary)" id="today-date"></div></div>
+        <div class="admin-user-badge">👤 Sorawit255</div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-card-icon">👥</div><div class="stat-card-value" id="db-total-students">0</div><div class="stat-card-label">นักเรียนทั้งหมด</div><div class="stat-card-sub">19 ห้องเรียน</div></div>
+        <div class="stat-card"><div class="stat-card-icon">✅</div><div class="stat-card-value" id="db-present-today">0</div><div class="stat-card-label">มาเรียนวันนี้</div><div class="stat-card-sub" id="db-present-pct">0%</div></div>
+        <div class="stat-card"><div class="stat-card-icon">❌</div><div class="stat-card-value" id="db-absent-today">0</div><div class="stat-card-label">ขาดเรียนวันนี้</div></div>
+        <div class="stat-card"><div class="stat-card-icon">⏰</div><div class="stat-card-value" id="db-late-today">0</div><div class="stat-card-label">มาสาย</div></div>
+      </div>
+
+      <!-- Submission Stats Row -->
+      <div class="stats-grid" style="margin-top:-0.5rem;margin-bottom:1.5rem">
+        <div class="stat-card"><div class="stat-card-icon">📋</div><div class="stat-card-value" id="db-total-tasks">0</div><div class="stat-card-label">งานทั้งหมด</div><div class="stat-card-sub" id="db-tasks-sub">รายการงาน</div></div>
+        <div class="stat-card"><div class="stat-card-icon">📬</div><div class="stat-card-value" id="db-total-subs">0</div><div class="stat-card-label">ส่งงานแล้ว</div><div class="stat-card-sub">รายการทั้งหมด</div></div>
+        <div class="stat-card"><div class="stat-card-icon">📊</div><div class="stat-card-value" id="db-sub-rate">0%</div><div class="stat-card-label">อัตราการส่งงาน</div><div class="stat-card-sub" id="db-sub-rate-sub">เฉลี่ยทุกงาน</div></div>
+      </div>
+
+      <div id="db-grade-overview"></div>
+
+      <!-- Per-Grade Submission Breakdown -->
+      <div class="section-card" style="margin-bottom:1.5rem">
+        <div class="section-card-title" style="margin-bottom:1rem">📊 สรุปการส่งงานแยกตามชั้น</div>
+        <div id="db-sub-breakdown-content"><div class="empty-state"><div class="empty-state-icon">📭</div><div>ยังไม่มีข้อมูลงาน</div></div></div>
+      </div>
+
+      <div class="section-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+          <div class="section-card-title">📋 บันทึกการเช็คชื่อล่าสุด</div>
+          <button class="btn-action btn-warning" onclick="exportAttendanceExcel()">⬇ Export Excel</button>
+        </div>
+        <div id="recent-log-wrap"><div class="empty-state"><div class="empty-state-icon">📭</div><div>ยังไม่มีข้อมูลการเช็คชื่อ</div></div></div>
+        <div style="margin-top:1.5rem">
+          <div class="section-card-title" style="margin-bottom:1rem">📬 การส่งงานล่าสุด</div>
+          <div id="recent-subs-wrap"><div class="empty-state"><div class="empty-state-icon">📭</div><div>ยังไม่มีการส่งงาน</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ATTENDANCE -->
+    <div id="page-attendance" class="page-content" style="display:none">
+      <div class="admin-topbar">
+        <div><h2>✅ เช็คชื่อนักเรียน</h2><div style="font-size:0.82rem;color:var(--text-secondary)" id="attend-date-label"></div></div>
+        <div style="display:flex;gap:0.6rem;align-items:center;flex-wrap:wrap">
+          <input type="date" id="attend-date" class="search-input" style="max-width:180px"/>
+          <button class="btn-action btn-success" onclick="saveAttendance()">💾 บันทึก</button>
+          <button class="btn-action btn-warning" onclick="exportAttendanceExcel()">⬇ Excel</button>
+        </div>
+      </div>
+      <div class="section-card">
+        <div class="class-tab-wrap">
+          <button class="class-tab active" onclick="switchAttendGrade('p5',this)">🎒 ป.5</button>
+          <button class="class-tab" onclick="switchAttendGrade('p6',this)">📝 ป.6</button>
+          <button class="class-tab" onclick="switchAttendGrade('m4',this)">🎓 ม.4</button>
+        </div>
+        <div class="room-tab-wrap" id="attend-room-tabs"></div>
+        <div style="display:flex;gap:0.6rem;margin-bottom:1rem;flex-wrap:wrap">
+          <button class="btn-action btn-success" onclick="markAllRoom('present')">✅ มาทุกคน</button>
+          <button class="btn-action btn-danger" onclick="markAllRoom('absent')">❌ ขาดทุกคน</button>
+        </div>
+        <div id="attend-table-wrap"></div>
+      </div>
+    </div>
+
+    <!-- STUDENTS -->
+    <div id="page-students" class="page-content" style="display:none">
+      <div class="admin-topbar">
+        <div><h2>👥 รายชื่อนักเรียน</h2></div>
+        <div style="display:flex;gap:0.6rem;flex-wrap:wrap">
+          <button class="btn-action btn-primary-sm" onclick="document.getElementById('import-modal').classList.add('open');updateImportRoomSel()">⬆ Import Excel</button>
+          <button class="btn-action btn-warning" onclick="exportStudentsExcel()">⬇ Export Excel</button>
+          <button class="btn-action btn-success" onclick="openAddStudent()">+ เพิ่มนักเรียน</button>
+        </div>
+      </div>
+      <div class="section-card">
+        <div class="class-tab-wrap">
+          <button class="class-tab active" onclick="switchStudentGrade('p5',this)">🎒 ป.5</button>
+          <button class="class-tab" onclick="switchStudentGrade('p6',this)">📝 ป.6</button>
+          <button class="class-tab" onclick="switchStudentGrade('m4',this)">🎓 ม.4</button>
+        </div>
+        <div class="room-tab-wrap" id="student-room-tabs"></div>
+        <div class="toolbar" style="margin-bottom:1rem">
+          <input type="text" id="student-search" class="search-input" placeholder="🔍 ค้นหานักเรียน..." oninput="renderStudentTable()"/>
+          <div id="student-count-badge" style="font-size:0.82rem;color:var(--text-secondary);white-space:nowrap"></div>
+        </div>
+        <div id="student-table-wrap"></div>
+      </div>
+    </div>
+
+    <!-- ASSIGNMENTS -->
+    <div id="page-assignments" class="page-content" style="display:none">
+      <div class="admin-topbar">
+        <div><h2>📋 จัดการงาน</h2></div>
+        <button class="btn-action btn-success" onclick="document.getElementById('new-task-modal').classList.add('open')">+ สร้างงานใหม่</button>
+      </div>
+      <!-- Filter tabs -->
+      <div class="class-tab-wrap">
+        <button class="class-tab active" onclick="switchTaskFilter('all',this)">📋 ทั้งหมด</button>
+        <button class="class-tab" onclick="switchTaskFilter('p5',this)">🎒 ป.5</button>
+        <button class="class-tab" onclick="switchTaskFilter('p6',this)">📝 ป.6</button>
+        <button class="class-tab" onclick="switchTaskFilter('m4',this)">🎓 ม.4</button>
+      </div>
+      <div id="tasks-admin-list"></div>
+    </div>
+
+  </main>
+</div>
+
+<!-- IMPORT MODAL -->
+<div class="modal-overlay" id="import-modal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="document.getElementById('import-modal').classList.remove('open')">✕</button>
+    <div class="modal-title">⬆ Import รายชื่อจาก Excel</div>
+    <div style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:1rem">ไฟล์ต้องมีคอลัมน์: <strong>เลขที่, ชื่อ-สกุล</strong></div>
+    <div style="display:flex;gap:0.6rem;margin-bottom:0.8rem;flex-wrap:wrap">
+      <select id="import-grade-sel" class="form-input" style="padding-left:12px;max-width:120px" onchange="updateImportRoomSel()">
+        <option value="p5">ป.5</option><option value="p6">ป.6</option><option value="m4">ม.4</option>
+      </select>
+      <select id="import-room-sel" class="form-input" style="padding-left:12px;max-width:120px"></select>
+    </div>
+    <div class="import-area" id="import-area" onclick="document.getElementById('excel-file').click()">
+      <div class="import-area-icon">📂</div>
+      <div class="import-area-text">คลิกเพื่อเลือกไฟล์ หรือลากวาง</div>
+      <div class="import-area-sub">รองรับ .xlsx, .xls, .csv</div>
+    </div>
+    <input type="file" id="excel-file" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleImport(event)"/>
+    <div id="import-preview" style="margin-top:1rem;font-size:0.85rem;color:var(--text-secondary)"></div>
+    <div style="display:flex;gap:0.6rem;margin-top:1.2rem">
+      <button class="btn-action btn-success" id="import-confirm-btn" onclick="confirmImport()" style="display:none">✅ ยืนยัน Import</button>
+      <button class="btn-action btn-danger" onclick="document.getElementById('import-modal').classList.remove('open')">ยกเลิก</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD STUDENT MODAL -->
+<div class="modal-overlay" id="add-student-modal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="document.getElementById('add-student-modal').classList.remove('open')">✕</button>
+    <div class="modal-title">+ เพิ่มนักเรียน</div>
+    <div class="form-group">
+      <label class="form-label">ระดับชั้น</label>
+      <select id="add-grade" class="form-input" style="padding-left:14px" onchange="updateAddRoomSel()">
+        <option value="p5">ป.5</option><option value="p6">ป.6</option><option value="m4">ม.4</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">ห้อง</label>
+      <select id="add-room" class="form-input" style="padding-left:14px"></select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">เลขที่</label>
+      <input type="number" id="add-no" class="form-input" style="padding-left:14px" placeholder="เลขที่"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">ชื่อ-สกุล</label>
+      <input type="text" id="add-name" class="form-input" style="padding-left:14px" placeholder="ชื่อ-สกุล"/>
+    </div>
+    <div style="display:flex;gap:0.6rem;margin-top:1rem">
+      <button class="btn-action btn-success" onclick="confirmAddStudent()">✅ เพิ่ม</button>
+      <button class="btn-action btn-danger" onclick="document.getElementById('add-student-modal').classList.remove('open')">ยกเลิก</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- NEW TASK MODAL -->
+<div class="modal-overlay" id="new-task-modal">
+  <div class="modal-box" style="max-width:560px">
+    <button class="modal-close" onclick="closeTaskModal()">✕</button>
+    <div class="modal-title" id="task-modal-title">📋 สร้างงานใหม่</div>
+    <input type="hidden" id="edit-task-id"/>
+    <div class="form-group">
+      <label class="form-label">ชื่องาน *</label>
+      <input type="text" id="task-title" class="form-input" style="padding-left:14px" placeholder="ชื่องาน/หัวข้อ"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">คำอธิบาย/คำสั่ง</label>
+      <textarea id="task-desc" class="form-textarea" placeholder="อธิบายงานให้นักเรียน..."></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">ประเภทการส่งงาน *</label>
+      <select id="task-type" class="form-select" onchange="toggleFormUrl()">
+        <option value="form">📋 Google Form (นักเรียนทำ Form)</option>
+        <option value="image">🖼 ส่งรูปภาพ</option>
+        <option value="both">📋🖼 ทั้ง Form + รูปภาพ</option>
+      </select>
+    </div>
+    <div class="form-group" id="form-url-group">
+      <label class="form-label">ลิงก์ Google Form *</label>
+      <input type="url" id="task-form-url" class="form-input" style="padding-left:14px" placeholder="https://forms.gle/..."/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">กำหนดส่ง</label>
+      <input type="date" id="task-due" class="form-input" style="padding-left:14px"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">ส่งถึงชั้น *</label>
+      <div class="checkbox-group">
+        <label class="checkbox-label"><input type="checkbox" id="tg-p5" value="p5"/> 🎒 ป.5</label>
+        <label class="checkbox-label"><input type="checkbox" id="tg-p6" value="p6"/> 📝 ป.6</label>
+        <label class="checkbox-label"><input type="checkbox" id="tg-m4" value="m4"/> 🎓 ม.4</label>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">แนบไฟล์/เอกสาร</label>
+      <input type="file" id="task-attach" multiple style="display:none" onchange="handleTaskAttach(event)"/>
+      <button class="btn-action" style="background:var(--bg-glass)" onclick="document.getElementById('task-attach').click()">📎 เลือกไฟล์</button>
+      <div class="attach-list" id="task-attach-list"></div>
+    </div>
+    <div style="display:flex;gap:0.6rem;margin-top:1.2rem">
+      <button class="btn-action btn-success" onclick="saveTask()">✅ บันทึก</button>
+      <button class="btn-action btn-danger" onclick="closeTaskModal()">ยกเลิก</button>
+    </div>
+  </div>
+</div>
+
+<!-- VIEW SUBMISSIONS MODAL -->
+<div class="modal-overlay" id="view-subs-modal">
+  <div class="modal-box" style="max-width:680px">
+    <button class="modal-close" onclick="document.getElementById('view-subs-modal').classList.remove('open')">✕</button>
+    <div class="modal-title" id="subs-modal-title">📬 รายการส่งงาน</div>
+    <div class="class-tab-wrap" id="subs-grade-tabs"></div>
+    <div id="subs-content"></div>
+  </div>
+</div>
+
+<!-- LIGHTBOX (admin) -->
+<div class="modal-overlay" id="admin-lightbox" style="background:rgba(0,0,0,0.92)">
+  <button class="modal-close" onclick="document.getElementById('admin-lightbox').classList.remove('open')" style="position:fixed;top:1rem;right:1.5rem;font-size:2rem;background:none;border:none;color:#fff;cursor:pointer">✕</button>
+  <img id="admin-lb-img" src="" style="max-width:90vw;max-height:90vh;border-radius:8px"/>
+</div>
+
+<!-- Supabase SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="../js/supabase-config.js"></script>
+<script src="../js/supabase-sync.js"></script>
+<script src="../js/admin.js"></script>
+</body>
+</html>

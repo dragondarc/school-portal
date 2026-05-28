@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>ห้อง ป.5 | Teacher Portal</title>
+<link rel="stylesheet" href="css/style.css"/>
+<link rel="stylesheet" href="css/classroom.css"/>
+</head>
+<body>
+<div class="bg-effects">
+  <div class="bg-orb bg-orb-1"></div>
+  <div class="bg-orb bg-orb-2"></div>
+</div>
+<nav class="navbar">
+  <a href="index.html" class="navbar-brand">
+    <div class="navbar-logo">📚</div>
+    <div><div class="navbar-title">Teacher Portal</div><div class="navbar-subtitle">ระบบจัดการงานนักเรียน</div></div>
+  </a>
+  <div class="navbar-nav">
+    <a href="index.html" class="nav-link">← หน้าหลัก</a>
+    <a href="admin/login.html" class="nav-link btn-admin">🔐 ผู้ดูแลระบบ</a>
+  </div>
+</nav>
+<div class="classroom-wrap">
+  <div class="classroom-header" id="cls-header"></div>
+  <div id="cls-room-selector"></div>
+  <div id="cls-name-bar"></div>
+  <div id="cls-tabs"></div>
+  <div id="tasks-wrap"></div>
+</div>
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" onclick="document.getElementById('lightbox').classList.remove('open')">✕</button>
+  <img id="lightbox-img" src="" alt=""/>
+</div>
+<footer class="footer"><p>© 2568 Teacher Portal</p></footer>
+<script>const GRADE = 'p5';</script>
+<!-- Supabase SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/supabase-sync.js"></script>
+<script src="js/student-auth.js"></script>
+<script src="js/classroom.js"></script>
+</body>
+</html>
