@@ -168,7 +168,7 @@ async function fb_fetchSubmissions() {
   } catch(e) { console.warn('[Supabase] fetchSubmissions:', e.message); return null; }
 }
 
-// ---- PULL ON LOAD (sync Supabase → localStorage) ----
+// ---- PULL: Supabase → localStorage ----
 async function fb_pullAll() {
   if (!_sbReady) return;
   try {
@@ -177,16 +177,70 @@ async function fb_pullAll() {
       const local  = JSON.parse(localStorage.getItem('tasks') || '[]');
       const merged = mergeById(local, tasks);
       localStorage.setItem('tasks', JSON.stringify(merged));
-      console.log('[Supabase] ✅ sync tasks:', merged.length, 'รายการ');
+      console.log('[Supabase] ✅ pull tasks:', merged.length, 'รายการ');
     }
     const subs = await fb_fetchSubmissions();
     if (subs && subs.length > 0) {
       const local  = JSON.parse(localStorage.getItem('submissions') || '[]');
       const merged = mergeById(local, subs);
       localStorage.setItem('submissions', JSON.stringify(merged));
-      console.log('[Supabase] ✅ sync submissions:', merged.length, 'รายการ');
+      console.log('[Supabase] ✅ pull submissions:', merged.length, 'รายการ');
     }
   } catch(e) { console.warn('[Supabase] pullAll:', e.message); }
+}
+
+// ---- PUSH: localStorage → Supabase (ใช้ตอน admin เปิด dashboard) ----
+async function fb_pushAll() {
+  if (!_sbReady) return;
+  let pushed = 0;
+
+  // Push tasks
+  const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+  if (tasks.length > 0) {
+    const rows = tasks.map(t => ({
+      id: t.id, title: t.title||'', type: t.type||'link',
+      form_url: t.formUrl||'', due_date: t.dueDate||'',
+      target_grades: t.targetGrades||[], posted_at: t.postedAt||0,
+      description: t.description||''
+    }));
+    const { error } = await _sb.from('tasks').upsert(rows, { onConflict:'id' });
+    if (!error) pushed += rows.length;
+    else console.warn('[Supabase] pushAll tasks:', error.message);
+  }
+
+  // Push submissions
+  const subs = JSON.parse(localStorage.getItem('submissions') || '[]');
+  if (subs.length > 0) {
+    const rows = subs.map(s => ({
+      id: String(s.id), task_id: s.taskId||'',
+      student_name: s.studentName||'', student_no: s.studentNo||'',
+      grade: s.grade||'', room: s.room||0,
+      submitted_at: typeof s.submittedAt === 'string'
+                      ? new Date(s.submittedAt).getTime()
+                      : (s.submittedAt||0),
+      type: s.type||'', images: s.images||[]
+    }));
+    const { error } = await _sb.from('submissions').upsert(rows, { onConflict:'id' });
+    if (!error) pushed += rows.length;
+    else console.warn('[Supabase] pushAll submissions:', error.message);
+  }
+
+  // Push students (ทุกห้อง)
+  const grades = { p5:7, p6:7, m4:5 };
+  for (const [g, maxRoom] of Object.entries(grades)) {
+    for (let r = 1; r <= maxRoom; r++) {
+      const arr = JSON.parse(localStorage.getItem(`students_${g}_${r}`) || '[]');
+      if (arr.length > 0) {
+        await _sb.from('students').delete().eq('grade',g).eq('room',r);
+        const rows = arr.map(s => ({ id:`${g}_${r}_${s.no}`, grade:g, room:r, no:s.no||'', name:s.name||'' }));
+        const { error } = await _sb.from('students').insert(rows);
+        if (!error) pushed += rows.length;
+      }
+    }
+  }
+
+  if (pushed > 0) console.log('[Supabase] ✅ pushAll สำเร็จ:', pushed, 'รายการ');
+  else console.log('[Supabase] pushAll: ไม่มีข้อมูลใหม่');
 }
 
 function mergeById(localArr, remoteArr) {

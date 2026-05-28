@@ -453,6 +453,10 @@ document.addEventListener('DOMContentLoaded', function() {
   updateImportRoomSel();
   updateAddRoomSel();
   renderDashboard();
+  // Push ข้อมูลใน localStorage ขึ้น Supabase ทุกครั้งที่ admin เปิด dashboard
+  setTimeout(() => {
+    if (typeof fb_pushAll === 'function') fb_pushAll();
+  }, 1500);
 });
 
 // =====================
