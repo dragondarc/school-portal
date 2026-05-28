@@ -186,6 +186,23 @@ async function fb_pullAll() {
       localStorage.setItem('submissions', JSON.stringify(merged));
       console.log('[Supabase] ✅ pull submissions:', merged.length, 'รายการ');
     }
+    // Pull students (ทุกห้อง) → localStorage students_grade_room
+    try {
+      const { data: allStudents, error: sErr } = await _sb
+        .from('students').select('grade, room, no, name').order('no');
+      if (!sErr && allStudents && allStudents.length > 0) {
+        const grouped = {};
+        allStudents.forEach(s => {
+          const key = `students_${s.grade}_${s.room}`;
+          if (!grouped[key]) grouped[key] = [];
+          grouped[key].push({ no: s.no, name: s.name });
+        });
+        Object.entries(grouped).forEach(([key, arr]) => {
+          localStorage.setItem(key, JSON.stringify(arr));
+        });
+        console.log('[Supabase] ✅ pull students:', allStudents.length, 'คน');
+      }
+    } catch(e) { console.warn('[Supabase] pullStudents:', e.message); }
   } catch(e) { console.warn('[Supabase] pullAll:', e.message); }
 }
 
