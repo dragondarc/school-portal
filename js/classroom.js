@@ -83,7 +83,7 @@ function buildHeader() {
       <div>
         <div class="cls-grade-badge" style="background:${cfg.color}22;color:${cfg.color};border:1px solid ${cfg.color}44">${cfg.short}</div>
         <div class="cls-title">${cfg.label}</div>
-        <div class="cls-desc">งานและกิจกรรมจากครู — เลือกห้องและกรอกชื่อเพื่อส่งงาน</div>
+        <div class="cls-desc">งานและกิจกรรมจากครู — เข้าสู่ระบบเพื่อดูและส่งงาน</div>
       </div>
       <div class="cls-emoji">${cfg.icon}</div>
     </div>
@@ -95,16 +95,9 @@ function buildHeader() {
 }
 
 function buildRoomSelector() {
+  // ห้องถูกกำหนดตอน login แล้ว (student-auth.js) ไม่แสดงซ้ำ
   const el = document.getElementById('cls-room-selector');
-  if (!el) return;
-  const opts = Array.from({ length: cfg.rooms }, (_, i) => `<option value="${i + 1}">ห้อง ${i + 1}</option>`).join('');
-  el.innerHTML = `<div class="room-selector-wrap">
-    <span class="room-selector-label">📍 เลือกห้องของคุณ:</span>
-    <select class="room-select" id="room-sel" onchange="changeRoom(this.value)">${opts}</select>
-  </div>`;
-  const saved = parseInt(localStorage.getItem('cls_room_' + GRADE) || '1');
-  selectedRoom = saved;
-  document.getElementById('room-sel').value = saved;
+  if (el) el.innerHTML = '';
 }
 
 function changeRoom(v) {
