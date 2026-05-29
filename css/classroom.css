@@ -96,6 +96,8 @@
 .submit-btn:hover { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 6px 18px rgba(67,233,123,0.4); }
 .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 .submitted-badge { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: rgba(67,233,123,0.12); border: 1px solid rgba(67,233,123,0.3); border-radius: 10px; color: var(--accent); font-size: 0.85rem; font-weight: 600; }
+.confirm-done-btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; background: rgba(67,233,123,0.12); border: 2px solid rgba(67,233,123,0.4); border-radius: 10px; color: var(--accent); font-family: inherit; font-size: 0.9rem; font-weight: 700; cursor: pointer; transition: var(--transition); }
+.confirm-done-btn:hover { background: rgba(67,233,123,0.22); border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 6px 18px rgba(67,233,123,0.25); }
 
 /* EMPTY STATE */
 .cls-empty { text-align: center; padding: 4rem 2rem; color: var(--text-muted); }

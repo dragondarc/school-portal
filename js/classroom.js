@@ -199,7 +199,9 @@ function renderTaskCard(task) {
   } else {
     let formBtn = '', imgUpload = '';
     if (task.type === 'form' || task.type === 'both') {
-      formBtn = `<a href="${task.formUrl}" target="_blank" class="form-link-btn" onclick="markFormSubmit('${task.id}')">📋 เปิด Google Form</a>`;
+      formBtn = `
+        <a href="${task.formUrl}" target="_blank" class="form-link-btn">📋 เปิด Google Form</a>
+        <button class="confirm-done-btn" onclick="markFormSubmit('${task.id}')">☑️ ฉันทำ Form เสร็จแล้ว</button>`;
     }
     if (task.type === 'image' || task.type === 'both') {
       imgUpload = `
@@ -234,7 +236,7 @@ function renderTaskCard(task) {
 // FORM SUBMISSION
 // ========================
 function markFormSubmit(taskId) {
-  syncFromSession(); // sync session ก่อนเสมอ
+  syncFromSession();
   if (!studentName || !studentNo) {
     showClsToast('⚠ กรุณาเข้าสู่ระบบก่อนส่งงาน', 'error');
     return;
@@ -243,13 +245,14 @@ function markFormSubmit(taskId) {
     showClsToast('✅ ส่งงานนี้ไปแล้ว', 'error');
     return;
   }
-  // รอ 2 วิ ให้ Form เปิดก่อน แล้วบันทึก
-  showClsToast('เปิด Google Form แล้ว... กลับมากดบันทึกหลังส่ง Form');
-  setTimeout(() => {
-    saveSubmission({ id: Date.now(), taskId: String(taskId), studentName, studentNo, grade: GRADE, room: Number(selectedRoom), submittedAt: new Date().toISOString(), type: 'form', images: [] });
-    renderTasks();
-    showClsToast('✅ บันทึกการส่งงานแล้ว');
-  }, 2000);
+  if (!confirm('ยืนยันว่าทำ Google Form เสร็จสมบูรณ์แล้ว?')) return;
+  saveSubmission({
+    id: Date.now(), taskId: String(taskId),
+    studentName, studentNo, grade: GRADE, room: Number(selectedRoom),
+    submittedAt: new Date().toISOString(), type: 'form', images: []
+  });
+  renderTasks();
+  showClsToast('✅ บันทึกการส่งงานแล้ว');
 }
 
 // ========================
