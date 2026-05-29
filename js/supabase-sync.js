@@ -169,40 +169,76 @@ async function fb_fetchSubmissions() {
 }
 
 // ---- PULL: Supabase → localStorage ----
+// ถ้า Supabase ว่าง (ล้างแล้ว) → ล้าง localStorage เครื่องนั้นด้วย
 async function fb_pullAll() {
   if (!_sbReady) return;
   try {
+    // --- tasks ---
     const tasks = await fb_fetchTasks();
-    if (tasks) {
-      const local  = JSON.parse(localStorage.getItem('tasks') || '[]');
-      const merged = mergeById(local, tasks);
-      localStorage.setItem('tasks', JSON.stringify(merged));
-      console.log('[Supabase] ✅ pull tasks:', merged.length, 'รายการ');
+    if (tasks !== null) {
+      if (tasks.length === 0) {
+        localStorage.removeItem('tasks');
+        console.log('[Supabase] 🗑️ Supabase tasks ว่าง → ล้าง localStorage');
+      } else {
+        const local  = JSON.parse(localStorage.getItem('tasks') || '[]');
+        const merged = mergeById(local, tasks);
+        localStorage.setItem('tasks', JSON.stringify(merged));
+        console.log('[Supabase] ✅ pull tasks:', merged.length, 'รายการ');
+      }
     }
+
+    // --- submissions ---
     const subs = await fb_fetchSubmissions();
-    if (subs && subs.length > 0) {
-      const local  = JSON.parse(localStorage.getItem('submissions') || '[]');
-      const merged = mergeById(local, subs);
-      localStorage.setItem('submissions', JSON.stringify(merged));
-      console.log('[Supabase] ✅ pull submissions:', merged.length, 'รายการ');
+    if (subs !== null) {
+      if (subs.length === 0) {
+        localStorage.removeItem('submissions');
+        console.log('[Supabase] 🗑️ Supabase submissions ว่าง → ล้าง localStorage');
+      } else {
+        const local  = JSON.parse(localStorage.getItem('submissions') || '[]');
+        const merged = mergeById(local, subs);
+        localStorage.setItem('submissions', JSON.stringify(merged));
+        console.log('[Supabase] ✅ pull submissions:', merged.length, 'รายการ');
+      }
     }
-    // Pull students (ทุกห้อง) → localStorage students_grade_room
+
+    // --- students ---
     try {
       const { data: allStudents, error: sErr } = await _sb
         .from('students').select('grade, room, no, name').order('no');
-      if (!sErr && allStudents && allStudents.length > 0) {
-        const grouped = {};
-        allStudents.forEach(s => {
-          const key = `students_${s.grade}_${s.room}`;
-          if (!grouped[key]) grouped[key] = [];
-          grouped[key].push({ no: s.no, name: s.name });
-        });
-        Object.entries(grouped).forEach(([key, arr]) => {
-          localStorage.setItem(key, JSON.stringify(arr));
-        });
-        console.log('[Supabase] ✅ pull students:', allStudents.length, 'คน');
+      if (!sErr) {
+        if (!allStudents || allStudents.length === 0) {
+          // Supabase ว่าง → ล้าง students ทุกห้องใน localStorage
+          Object.keys(localStorage).filter(k => k.startsWith('students_'))
+            .forEach(k => localStorage.removeItem(k));
+          console.log('[Supabase] 🗑️ Supabase students ว่าง → ล้าง localStorage');
+        } else {
+          const grouped = {};
+          allStudents.forEach(s => {
+            const key = `students_${s.grade}_${s.room}`;
+            if (!grouped[key]) grouped[key] = [];
+            grouped[key].push({ no: s.no, name: s.name });
+          });
+          Object.entries(grouped).forEach(([key, arr]) => {
+            localStorage.setItem(key, JSON.stringify(arr));
+          });
+          console.log('[Supabase] ✅ pull students:', allStudents.length, 'คน');
+        }
       }
     } catch(e) { console.warn('[Supabase] pullStudents:', e.message); }
+
+    // --- attendance ---
+    // เช็คว่า attendance ใน Supabase ว่างไหม ถ้าว่างล้าง localStorage ด้วย
+    try {
+      const { data: attData, error: attErr } = await _sb
+        .from('attendance').select('id').limit(1);
+      if (!attErr && attData && attData.length === 0) {
+        Object.keys(localStorage)
+          .filter(k => k.startsWith('att_') || k === 'attend_logs')
+          .forEach(k => localStorage.removeItem(k));
+        console.log('[Supabase] 🗑️ Supabase attendance ว่าง → ล้าง localStorage');
+      }
+    } catch(e) { /* ไม่บังคับ */ }
+
   } catch(e) { console.warn('[Supabase] pullAll:', e.message); }
 }
 
