@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>ล้างข้อมูลระบบ</title>
+<style>
+  body { font-family: sans-serif; display:flex; align-items:center; justify-content:center;
+         min-height:100vh; margin:0; background:#f0f4ff; }
+  .box { background:#fff; border-radius:16px; padding:40px; text-align:center;
+         box-shadow:0 4px 24px rgba(0,0,0,.1); max-width:400px; width:90%; }
+  h2 { color:#e53e3e; margin-top:0; }
+  p  { color:#555; }
+  .done { color:#38a169; font-size:1.4em; font-weight:700; }
+  button { margin-top:20px; padding:12px 32px; border:none; border-radius:8px;
+           background:#4361ee; color:#fff; font-size:1em; cursor:pointer; border-radius:8px; }
+  button:hover { background:#3451d1; }
+</style>
+</head>
+<body>
+<div class="box">
+  <h2>🗑️ ล้างข้อมูลระบบ</h2>
+  <p id="status">กำลังล้าง localStorage...</p>
+  <div id="result"></div>
+  <button onclick="window.location.href='../admin/login.html'">กลับหน้า Login</button>
+</div>
+<script>
+  const keys = [
+    'tasks','submissions','attend_logs',
+    ...Array.from({length:7},(_,i)=>`students_p5_${i+1}`),
+    ...Array.from({length:7},(_,i)=>`students_p6_${i+1}`),
+    ...Array.from({length:5},(_,i)=>`students_m4_${i+1}`),
+  ];
+  // ล้าง attendance keys
+  Object.keys(localStorage).forEach(k => {
+    if (k.startsWith('att_') || k.startsWith('attend') || k.startsWith('students_') ||
+        k === 'tasks' || k === 'submissions') {
+      localStorage.removeItem(k);
+    }
+  });
+  document.getElementById('status').textContent = '';
+  document.getElementById('result').innerHTML = '<div class="done">✅ ล้างข้อมูลเครื่องนี้สำเร็จ</div>' +
+    '<p style="color:#555;margin-top:12px;">Supabase ถูกล้างแล้ว<br>localStorage เครื่องนี้ถูกล้างแล้ว</p>';
+</script>
+</body>
+</html>
