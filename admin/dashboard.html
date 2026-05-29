@@ -55,7 +55,10 @@
     <div id="page-dashboard" class="page-content">
       <div class="admin-topbar">
         <div><h2>📊 Dashboard</h2><div style="font-size:0.82rem;color:var(--text-secondary)" id="today-date"></div></div>
-        <div class="admin-user-badge">👤 Sorawit255</div>
+        <div style="display:flex;gap:0.6rem;align-items:center">
+          <button class="btn-action btn-danger" onclick="openClearModal()" style="font-size:0.8rem;padding:7px 14px">🗑️ ล้างข้อมูล</button>
+          <div class="admin-user-badge">👤 Sorawit255</div>
+        </div>
       </div>
       <div class="stats-grid">
         <div class="stat-card"><div class="stat-card-icon">👥</div><div class="stat-card-value" id="db-total-students">0</div><div class="stat-card-label">นักเรียนทั้งหมด</div><div class="stat-card-sub">19 ห้องเรียน</div></div>
@@ -285,6 +288,89 @@
   <button class="modal-close" onclick="document.getElementById('admin-lightbox').classList.remove('open')" style="position:fixed;top:1rem;right:1.5rem;font-size:2rem;background:none;border:none;color:#fff;cursor:pointer">✕</button>
   <img id="admin-lb-img" src="" style="max-width:90vw;max-height:90vh;border-radius:8px"/>
 </div>
+
+<!-- CLEAR DATA MODAL -->
+<div class="modal-overlay" id="clear-modal">
+  <div class="modal-box" style="max-width:460px">
+    <button class="modal-close" onclick="document.getElementById('clear-modal').classList.remove('open')">✕</button>
+    <div class="modal-title" style="color:#e53e3e">🗑️ ล้างข้อมูลระบบ</div>
+    <p style="font-size:0.88rem;color:var(--text-secondary);margin-bottom:1.2rem">⚠️ ข้อมูลที่ลบจะ<strong>กู้คืนไม่ได้</strong> กรุณาเลือกข้อมูลที่ต้องการล้าง</p>
+    <div style="display:flex;flex-direction:column;gap:0.7rem;margin-bottom:1.4rem">
+      <label class="checkbox-label"><input type="checkbox" id="clr-students"/> 👥 รายชื่อนักเรียนทั้งหมด</label>
+      <label class="checkbox-label"><input type="checkbox" id="clr-submissions"/> 📬 การส่งงานทั้งหมด</label>
+      <label class="checkbox-label"><input type="checkbox" id="clr-attendance"/> ✅ ประวัติการเช็คชื่อทั้งหมด</label>
+      <label class="checkbox-label"><input type="checkbox" id="clr-tasks"/> 📋 งานที่ครูสร้างทั้งหมด</label>
+    </div>
+    <div id="clear-progress" style="display:none;font-size:0.85rem;color:var(--text-secondary);margin-bottom:1rem">⏳ กำลังล้างข้อมูล...</div>
+    <div style="display:flex;gap:0.6rem">
+      <button class="btn-action btn-danger" id="clear-confirm-btn" onclick="confirmClearData()">🗑️ ยืนยันล้างข้อมูล</button>
+      <button class="btn-action" style="background:var(--bg-glass)" onclick="document.getElementById('clear-modal').classList.remove('open')">ยกเลิก</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function openClearModal() {
+  // reset checkboxes
+  ['clr-students','clr-submissions','clr-attendance','clr-tasks'].forEach(id => {
+    document.getElementById(id).checked = false;
+  });
+  document.getElementById('clear-progress').style.display = 'none';
+  document.getElementById('clear-confirm-btn').disabled = false;
+  document.getElementById('clear-modal').classList.add('open');
+}
+
+async function confirmClearData() {
+  const doStudents   = document.getElementById('clr-students').checked;
+  const doSubs       = document.getElementById('clr-submissions').checked;
+  const doAttendance = document.getElementById('clr-attendance').checked;
+  const doTasks      = document.getElementById('clr-tasks').checked;
+
+  if (!doStudents && !doSubs && !doAttendance && !doTasks) {
+    alert('กรุณาเลือกข้อมูลที่ต้องการล้างอย่างน้อย 1 รายการ');
+    return;
+  }
+
+  const prog = document.getElementById('clear-progress');
+  const btn  = document.getElementById('clear-confirm-btn');
+  prog.style.display = 'block';
+  btn.disabled = true;
+
+  const SB_URL = typeof SUPABASE_URL !== 'undefined' ? SUPABASE_URL : '';
+  const SB_KEY = typeof SUPABASE_ANON_KEY !== 'undefined' ? SUPABASE_ANON_KEY : '';
+  const headers = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Prefer': 'return=minimal' };
+
+  async function sbDelete(table) {
+    if (!SB_URL) return;
+    try { await fetch(`${SB_URL}/rest/v1/${table}?id=gte.`, { method:'DELETE', headers }); }
+    catch(e) { console.warn('clear', table, e.message); }
+  }
+
+  if (doStudents) {
+    prog.textContent = '⏳ ล้างรายชื่อนักเรียน...';
+    await sbDelete('students');
+    Object.keys(localStorage).filter(k => k.startsWith('students_')).forEach(k => localStorage.removeItem(k));
+  }
+  if (doSubs) {
+    prog.textContent = '⏳ ล้างการส่งงาน...';
+    await sbDelete('submissions');
+    localStorage.removeItem('submissions');
+  }
+  if (doAttendance) {
+    prog.textContent = '⏳ ล้างประวัติเช็คชื่อ...';
+    await sbDelete('attendance');
+    Object.keys(localStorage).filter(k => k.startsWith('att_') || k === 'attend_logs').forEach(k => localStorage.removeItem(k));
+  }
+  if (doTasks) {
+    prog.textContent = '⏳ ล้างงาน...';
+    await sbDelete('tasks');
+    localStorage.removeItem('tasks');
+  }
+
+  prog.textContent = '✅ ล้างข้อมูลสำเร็จ! กำลังรีโหลด...';
+  setTimeout(() => location.reload(), 1200);
+}
+</script>
 
 <!-- Supabase SDK -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
